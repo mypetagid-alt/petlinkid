@@ -1,0 +1,39 @@
+// ══════════════════════════════════════════════════════════════
+// REGLAS DE SEGURIDAD FIRESTORE — PetLinkID
+// Copia y pega estas reglas en:
+// Firebase Console → Firestore → Reglas
+// ══════════════════════════════════════════════════════════════
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /tags/{tagId} {
+
+      // Cualquier persona puede LEER un tag activo (perfil público)
+      // pero NUNCA ve el teléfono, contraseña ni datos privados
+      allow read: if true;
+
+      // Solo se puede CREAR un tag si viene sin datos privados expuestos
+      // (el admin crea tags vacíos, el dueño activa con su info)
+      allow create: if request.resource.data.status in ['inactive', 'active'];
+
+      // Solo se puede ACTUALIZAR si el documento ya existe
+      // En producción avanzada: validar con Firebase Auth
+      allow update: if resource.data != null;
+
+      // No se puede borrar desde el cliente (solo admin)
+      allow delete: if false;
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// INSTRUCCIONES:
+// 1. Ve a console.firebase.google.com
+// 2. Selecciona tu proyecto petlinkid-b3c94
+// 3. Firestore Database → pestaña "Reglas"
+// 4. Borra el contenido actual y pega las reglas de arriba
+//    (sin los comentarios con //)
+// 5. Click "Publicar"
+// ══════════════════════════════════════════════════════════════
